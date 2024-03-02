@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DayButton">
+        <item name="android:background">@drawable/selector_day</item>
+        <item name="android:textColor">@color/selector_day</item>
+    </style>
+
+</resources>
