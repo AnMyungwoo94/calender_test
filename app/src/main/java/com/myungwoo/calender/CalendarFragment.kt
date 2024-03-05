@@ -2,16 +2,17 @@ package com.myungwoo.calender
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.myungwoo.calender.databinding.FragmentCalendarBinding
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
@@ -24,6 +25,8 @@ class CalendarFragment : Fragment() {
 
     private lateinit var calendarAdapter: CalendarAdapter
     private var calendarList = ArrayList<Week>()
+    private val args by navArgs<CalendarFragmentArgs>()
+    private var isItemsVisible: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,7 +65,6 @@ class CalendarFragment : Fragment() {
             if (days.size == 7) {
                 calendarList.add(Week(days[0], days[1], days[2], days[3], days[4], days[5], days[6]))
             }
-
         }
 
         calendarAdapter = CalendarAdapter(calendarList)
@@ -73,12 +75,40 @@ class CalendarFragment : Fragment() {
         snapHelper.attachToRecyclerView(binding.weekRecycler)
 
         binding.textView2.setOnClickListener {
-            binding.group.visibility = View.VISIBLE
+            isItemsVisible = !isItemsVisible
+            calendarAdapter.toggleItemsVisibility()
+            if (isItemsVisible) {
+                binding.group.visibility = View.VISIBLE
+            } else {
+                binding.group.visibility = View.GONE
+            }
         }
 
         binding.timeRecycler.adapter = TimeAdapter()
 
         setClickableAreasListeners()
+
+        binding.textYearMonth.setOnClickListener {
+            val modalBottomSheet = ModalBottomSheet()
+            modalBottomSheet.show(parentFragmentManager, ModalBottomSheet.TAG)
+        }
+
+
+        // 오늘 날짜가 포함된 주의 인덱스를 찾습니다.
+        val todayIndex = calendarList.indexOfFirst { week ->
+            LocalDate.now().let { today ->
+                today.isAfter(LocalDate.of(week.day1.year.toInt(), week.day1.month.toInt(), week.day1.day.toInt()).minusDays(1)) &&
+                        today.isBefore(LocalDate.of(week.day7.year.toInt(), week.day7.month.toInt(), week.day7.day.toInt()).plusDays(1))
+            }
+        }
+
+        // 찾은 인덱스로 스크롤합니다. 인덱스가 유효한 경우에만 실행합니다.
+        if (todayIndex >= 0) {
+            binding.weekRecycler.post {
+                binding.weekRecycler.scrollToPosition(todayIndex)
+            }
+        }
+
     }
 
     private fun setClickableAreasListeners() {
@@ -113,6 +143,8 @@ class CalendarFragment : Fragment() {
                 }
                 // 로그를 출력합니다.
                 clickedDay?.let { day ->
+                    val action = CalendarFragmentDirections.actionCalendarFragmentToDailyFagment(clickedDay.toString())
+                    findNavController().navigate(action)
                     Log.d("CalendarFragment", "Clicked on area ${index + 1}, Date: ${day.year}-${day.month}-${day.day}")
                 }
             }

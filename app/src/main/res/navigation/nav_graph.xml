@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/calendarFragment">
+
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="com.myungwoo.calender.CalendarFragment"
+        android:label="CalendarFragment"
+        tools:layout="@layout/fragment_calendar">
+        <argument
+            android:name="day"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_calendarFragment_to_modalBottomSheet"
+            app:destination="@id/modalBottomSheet" />
+        <action
+            android:id="@+id/action_calendarFragment_to_dailyFagment"
+            app:destination="@id/dailyFagment" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/modalBottomSheet"
+        android:name="com.myungwoo.calender.ModalBottomSheet"
+        android:label="ModalBottomSheet"
+        tools:layout="@layout/example_1_fragment">
+        <argument
+            android:name="day"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_modalBottomSheet_to_calendarFragment"
+            app:destination="@id/calendarFragment" />
+    </dialog>
+    <fragment
+        android:id="@+id/dailyFagment"
+        android:name="com.myungwoo.calender.DailyFagment"
+        android:label="DailyFagment">
+        <argument
+            android:name="day"
+            app:argType="string" />
+    </fragment>
+</navigation>

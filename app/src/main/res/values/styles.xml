@@ -4,6 +4,19 @@
     <style name="DayButton">
         <item name="android:background">@drawable/selector_day</item>
         <item name="android:textColor">@color/selector_day</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
     </style>
+
+    <style name="ModalBottomSheetDialog" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/white</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.App.LargeComponent</item>
+    </style>
+
+    <style name="ShapeAppearance.App.LargeComponent" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
 
 </resources>
