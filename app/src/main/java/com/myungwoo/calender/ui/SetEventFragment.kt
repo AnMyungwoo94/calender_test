@@ -1,4 +1,4 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater

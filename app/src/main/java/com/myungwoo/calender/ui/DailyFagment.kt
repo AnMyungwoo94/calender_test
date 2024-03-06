@@ -1,10 +1,15 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.myungwoo.calender.data.CalendarVO
+import com.myungwoo.calender.adapter.DailyAdapter
+import com.myungwoo.calender.data.Detail
+import com.myungwoo.calender.adapter.DetailAdapter
+import com.myungwoo.calender.R
 import com.myungwoo.calender.databinding.FragmentDailyFagmentBinding
 import java.time.DayOfWeek
 import java.time.LocalDateTime

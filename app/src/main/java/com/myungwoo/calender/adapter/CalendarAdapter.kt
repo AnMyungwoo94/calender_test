@@ -1,10 +1,12 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat.getColor
 import androidx.recyclerview.widget.RecyclerView
+import com.myungwoo.calender.R
+import com.myungwoo.calender.data.Week
 import com.myungwoo.calender.databinding.ItemCalendarListBinding
 import java.time.LocalDate
 

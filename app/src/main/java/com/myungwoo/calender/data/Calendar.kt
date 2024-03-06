@@ -1,4 +1,4 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.data
 
 data class CalendarVO(
     var date: String = "",

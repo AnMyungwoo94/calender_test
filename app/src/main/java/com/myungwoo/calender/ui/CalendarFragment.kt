@@ -1,4 +1,4 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -7,9 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.myungwoo.calender.adapter.CalendarAdapter
+import com.myungwoo.calender.data.Day
+import com.myungwoo.calender.adapter.TimeAdapter
+import com.myungwoo.calender.data.Week
 import com.myungwoo.calender.databinding.FragmentCalendarBinding
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -25,7 +28,6 @@ class CalendarFragment : Fragment() {
 
     private lateinit var calendarAdapter: CalendarAdapter
     private var calendarList = ArrayList<Week>()
-    private val args by navArgs<CalendarFragmentArgs>()
     private var isItemsVisible: Boolean = false
 
     override fun onCreateView(
@@ -39,41 +41,61 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 현재 달의 연도와 월을 표시합니다.
+        setCurrentMonth()
+        setCurrentToday()
+        setCalendarAdapter()
+        binding.timeRecycler.adapter = TimeAdapter()
+        setWeekVisible()
+        setClickableAreasListeners()
+        showModalBottomSheet()
+
+    }
+
+    private fun setCurrentMonth() {
         val now = LocalDateTime.now()
         val monthFormat = DateTimeFormatter.ofPattern("MM월").withLocale(Locale.forLanguageTag("ko"))
-        val localDate = now.format(monthFormat)
-        binding.textYearMonth.text = localDate
+        binding.textYearMonth.text = now.format(monthFormat)
 
-        // 이번 달의 첫째 날과 마지막 날을 구합니다.
-        val firstDayOfMonth = now.with(TemporalAdjusters.firstDayOfMonth())
-        val lastDayOfMonth = now.with(TemporalAdjusters.lastDayOfMonth())
+        val firstDay = now.with(TemporalAdjusters.firstDayOfMonth())
+        val lastDay = now.with(TemporalAdjusters.lastDayOfMonth())
+        var currentDate = firstDay.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
 
-        // 이번 달의 첫 주의 일요일부터 시작합니다.
-        var currentDate = firstDayOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-
-        calendarList.clear() // 기존 리스트를 클리어합니다.
-        while (currentDate.isBefore(lastDayOfMonth) || currentDate.isEqual(lastDayOfMonth)) {
+        calendarList.clear()
+        while (currentDate.isBefore(lastDay) || currentDate.isEqual(lastDay)) {
             val days = mutableListOf<Day>()
-            // 한 주의 날짜를 수집합니다.
             for (i in 0 until 7) {
                 val isCurrentMonth = currentDate.monthValue == now.monthValue
                 days.add(Day(currentDate.year.toString(), currentDate.monthValue.toString(), currentDate.dayOfMonth.toString(), isCurrentMonth))
                 currentDate = currentDate.plusDays(1)
             }
-            // 수집된 날짜로 Week 객체를 생성하여 리스트에 추가합니다.
             if (days.size == 7) {
                 calendarList.add(Week(days[0], days[1], days[2], days[3], days[4], days[5], days[6]))
             }
         }
+    }
 
+    private fun setCurrentToday() {
+        val todayIndex = calendarList.indexOfFirst { week ->
+            LocalDate.now().let { today ->
+                today.isAfter(LocalDate.of(week.day1.year.toInt(), week.day1.month.toInt(), week.day1.day.toInt()).minusDays(1)) &&
+                        today.isBefore(LocalDate.of(week.day7.year.toInt(), week.day7.month.toInt(), week.day7.day.toInt()).plusDays(1))
+            }
+        }
+
+        if (todayIndex >= 0) {
+            binding.weekRecycler.post {
+                binding.weekRecycler.scrollToPosition(todayIndex)
+            }
+        }
+    }
+
+    private fun setCalendarAdapter() {
         calendarAdapter = CalendarAdapter(calendarList)
         binding.weekRecycler.adapter = calendarAdapter
+        PagerSnapHelper().attachToRecyclerView(binding.weekRecycler)
+    }
 
-
-        val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(binding.weekRecycler)
-
+    private fun setWeekVisible() {
         binding.textView2.setOnClickListener {
             isItemsVisible = !isItemsVisible
             calendarAdapter.toggleItemsVisibility()
@@ -83,32 +105,13 @@ class CalendarFragment : Fragment() {
                 binding.group.visibility = View.GONE
             }
         }
+    }
 
-        binding.timeRecycler.adapter = TimeAdapter()
-
-        setClickableAreasListeners()
-
+    private fun showModalBottomSheet() {
         binding.textYearMonth.setOnClickListener {
-            val modalBottomSheet = ModalBottomSheet()
-            modalBottomSheet.show(parentFragmentManager, ModalBottomSheet.TAG)
+            val action = CalendarFragmentDirections.actionCalendarFragmentToModalBottomSheet("d")
+            findNavController().navigate(action)
         }
-
-
-        // 오늘 날짜가 포함된 주의 인덱스를 찾습니다.
-        val todayIndex = calendarList.indexOfFirst { week ->
-            LocalDate.now().let { today ->
-                today.isAfter(LocalDate.of(week.day1.year.toInt(), week.day1.month.toInt(), week.day1.day.toInt()).minusDays(1)) &&
-                        today.isBefore(LocalDate.of(week.day7.year.toInt(), week.day7.month.toInt(), week.day7.day.toInt()).plusDays(1))
-            }
-        }
-
-        // 찾은 인덱스로 스크롤합니다. 인덱스가 유효한 경우에만 실행합니다.
-        if (todayIndex >= 0) {
-            binding.weekRecycler.post {
-                binding.weekRecycler.scrollToPosition(todayIndex)
-            }
-        }
-
     }
 
     private fun setClickableAreasListeners() {
@@ -124,11 +127,8 @@ class CalendarFragment : Fragment() {
 
         clickableViews.forEachIndexed { index, view ->
             view.setOnClickListener {
-                // 현재 보이는 주의 인덱스를 계산합니다.
                 val visiblePosition = (binding.weekRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                // 현재 주를 가져옵니다.
                 val currentWeek = calendarList.getOrNull(visiblePosition)
-                // 클릭된 날짜를 가져옵니다.
                 val clickedDay = currentWeek?.let { week ->
                     when (index) {
                         0 -> week.day1
@@ -141,7 +141,6 @@ class CalendarFragment : Fragment() {
                         else -> null
                     }
                 }
-                // 로그를 출력합니다.
                 clickedDay?.let { day ->
                     val action = CalendarFragmentDirections.actionCalendarFragmentToDailyFagment(clickedDay.toString())
                     findNavController().navigate(action)
@@ -155,5 +154,4 @@ class CalendarFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
 }

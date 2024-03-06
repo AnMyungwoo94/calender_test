@@ -1,6 +1,7 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,26 +15,24 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.ViewContainer
+import com.myungwoo.calender.R
 import com.myungwoo.calender.databinding.Example1FragmentBinding
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
 class ModalBottomSheet : BottomSheetDialogFragment() {
+
     private var _binding: Example1FragmentBinding? = null
     private val binding get() = _binding!!
     private val args by navArgs<ModalBottomSheetArgs>()
-
-
-    // 달력에 사용될 날짜들
     private val selectedDates = mutableSetOf<LocalDate>()
-    private val today = LocalDate.now()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = Example1FragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -41,16 +40,14 @@ class ModalBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
+        val selectedDate = args.day
         val daysOfWeek = daysOfWeek()
-        configureLegend(daysOfWeek)
         val currentMonth = YearMonth.now()
-        setupMonthCalendar(currentMonth, daysOfWeek)
-        setupWeekCalendar(currentMonth, daysOfWeek)
 
-        // 달력의 월 스크롤 리스너 설정
+        configureLegend(daysOfWeek)
+        setupMonthCalendar(currentMonth, daysOfWeek, selectedDate)
+
         binding.exOneCalendar.monthScrollListener = {
-            // 현재 보이는 달로 헤더의 년도와 월을 업데이트합니다.
             binding.exOneYearText.text = "${it.yearMonth.year}년 ${it.yearMonth.monthValue}월"
         }
     }
@@ -60,11 +57,10 @@ class ModalBottomSheet : BottomSheetDialogFragment() {
             .map { it as TextView }
             .forEachIndexed { index, textView ->
                 textView.text = daysOfWeek[index].name.take(1)
-                textView.setTextColorRes(R.color.black)
             }
     }
 
-    private fun setupMonthCalendar(currentMonth: YearMonth, daysOfWeek: List<DayOfWeek>) {
+    private fun setupMonthCalendar(currentMonth: YearMonth, daysOfWeek: List<DayOfWeek>, selectedDate: String) {
         class DayViewContainer(view: View) : ViewContainer(view) {
             lateinit var day: CalendarDay
             val textView: TextView = view.findViewById(R.id.exOneDayText)
@@ -104,23 +100,8 @@ class ModalBottomSheet : BottomSheetDialogFragment() {
         binding.exOneCalendar.scrollToMonth(currentMonth)
     }
 
-
-    private fun setupWeekCalendar(currentMonth: YearMonth, daysOfWeek: List<DayOfWeek>) {
-        // 이 부분은 월간 달력 설정과 유사하며, 주간 달력에 맞게 조정됩니다.
-        // WeekCalendarView 설정 코드 여기에 추가
-    }
-
-    private fun TextView.setTextColorRes(colorRes: Int) {
-        val color = context.getColor(colorRes)
-        this.setTextColor(color)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-        const val TAG = "ModalBottomSheet"
     }
 }

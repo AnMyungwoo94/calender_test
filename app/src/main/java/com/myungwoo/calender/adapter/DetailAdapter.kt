@@ -1,4 +1,4 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -6,7 +6,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.myungwoo.calender.data.Detail
+import com.myungwoo.calender.R
 import com.myungwoo.calender.databinding.ItemDailyListBinding
+import com.myungwoo.calender.ui.SetEventFragment
 
 class DetailAdapter(private val dList: List<Detail>) :
     RecyclerView.Adapter<DetailAdapter.ViewHolder>() {

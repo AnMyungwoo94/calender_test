@@ -1,11 +1,11 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.myungwoo.calender.CalendarVO
+import com.myungwoo.calender.data.CalendarVO
 import com.myungwoo.calender.databinding.ItemCalendarListBinding
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

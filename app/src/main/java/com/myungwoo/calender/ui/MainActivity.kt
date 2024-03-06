@@ -1,8 +1,9 @@
-package com.myungwoo.calender
+package com.myungwoo.calender.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
+import com.myungwoo.calender.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
